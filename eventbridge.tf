@@ -126,3 +126,15 @@ resource "aws_cloudwatch_event_rule" "order_shipped" {
     detail-type = ["OrderShipped"]
   })
 }
+
+# Order Ready For Shipment Rule
+resource "aws_cloudwatch_event_rule" "order_ready_for_shipment" {
+  name           = "OrderReadyForShipmentRule"
+  description    = "EventBridge rule for OrderReadyForShipment event"
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+
+  event_pattern = jsonencode({
+    source      = ["gemini"]
+    detail-type = ["OrderReadyForShipment"]
+  })
+}

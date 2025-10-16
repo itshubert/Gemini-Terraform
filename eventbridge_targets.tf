@@ -188,3 +188,16 @@ resource "aws_cloudwatch_event_target" "order_shipped_to_order" {
     message_group_id = "order-shipped"
   }
 }
+
+# Order Ready For Shipment Target
+resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_order" {
+  rule           = aws_cloudwatch_event_rule.order_ready_for_shipment.name
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+  target_id      = "sqs-orderreadyforshipment-order"
+  arn            = aws_sqs_queue.fulfillment_orderreadyforshipment_order.arn
+  input_path     = "$.detail"
+
+  sqs_target {
+    message_group_id = "order-ready-for-shipment"
+  }
+}

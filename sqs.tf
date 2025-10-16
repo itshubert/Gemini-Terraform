@@ -95,6 +95,13 @@ resource "aws_sqs_queue" "fulfillment_ordershipped_order" {
   content_based_deduplication = true
 }
 
+# Order Ready For Shipment Queue
+resource "aws_sqs_queue" "fulfillment_orderreadyforshipment_order" {
+  name                        = "fulfillment-orderreadyforshipment-order.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = true
+}
+
 # ============================================================================
 # SQS Queue Policies - Allow EventBridge to Send Messages
 # ============================================================================
@@ -319,6 +326,22 @@ resource "aws_sqs_queue_policy" "fulfillment_ordershipped_order" {
       }
       Action   = "sqs:SendMessage"
       Resource = aws_sqs_queue.fulfillment_ordershipped_order.arn
+    }]
+  })
+}
+
+resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_order" {
+  queue_url = aws_sqs_queue.fulfillment_orderreadyforshipment_order.url
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "events.amazonaws.com"
+      }
+      Action   = "sqs:SendMessage"
+      Resource = aws_sqs_queue.fulfillment_orderreadyforshipment_order.arn
     }]
   })
 }
