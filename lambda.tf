@@ -35,6 +35,32 @@ resource "aws_lambda_function" "shipping_create" {
   }
 }
 
+resource "aws_lambda_function" "shipment_ready" {
+  count            = var.use_localstack || length(var.lambda_functions) > 0 ? 1 : 0
+  filename         = "geminicarrier.zip"
+  function_name    = "shipment-ready"
+  role             = aws_iam_role.lambda_execution_role[0].arn
+  handler          = "index.handler"
+  source_code_hash = filebase64sha256("geminicarrier.zip")
+  runtime          = "nodejs20.x"
+  timeout          = 30
+
+  environment {
+    variables = {
+      NODE_ENV         = var.use_localstack ? "development" : "production"
+      AWS_REGION       = "us-east-1"
+      AWS_ENDPOINT_URL = var.use_localstack ? "http://localstack:4566" : ""
+      EVENT_BUS_NAME   = var.event_bus_name
+      EVENT_SOURCE     = "gemini"
+    }
+  }
+
+  tags = {
+    Environment = var.use_localstack ? "development" : "production"
+    Project     = "gemini"
+  }
+}
+
 # ============================================================================
 # IAM Role for Lambda Execution
 # ============================================================================
@@ -94,4 +120,13 @@ resource "aws_lambda_permission" "eventbridge_invoke_shipping_create" {
   function_name = aws_lambda_function.shipping_create[0].function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.shipping_job_created.arn
+}
+
+resource "aws_lambda_permission" "eventbridge_invoke_shipment_ready" {
+  count         = var.use_localstack || length(var.lambda_functions) > 0 ? 1 : 0
+  statement_id  = "AllowEventBridgeInvokeShipmentReady"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.shipment_ready[0].function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.order_ready_for_shipment.arn
 }

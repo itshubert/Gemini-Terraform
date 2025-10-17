@@ -178,16 +178,13 @@ resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_order" {
   }
 }
 
-resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_carrier" {
+resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_lambda" {
+  count          = var.use_localstack || length(var.lambda_functions) > 0 ? 1 : 0
   rule           = aws_cloudwatch_event_rule.order_ready_for_shipment.name
   event_bus_name = aws_cloudwatch_event_bus.gemini.name
-  target_id      = "sqs-orderreadyforshipment-carrier"
-  arn            = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.arn
+  target_id      = "lambda-shipment-ready"
+  arn            = aws_lambda_function.shipment_ready[0].arn
   input_path     = "$.detail"
-
-  sqs_target {
-    message_group_id = "order-ready-for-shipment"
-  }
 }
 
 # Order In Progress Target
@@ -200,5 +197,30 @@ resource "aws_cloudwatch_event_target" "order_in_progress_to_order" {
 
   sqs_target {
     message_group_id = "order-in-progress"
+  }
+}
+
+# Order Delivered Targets
+resource "aws_cloudwatch_event_target" "order_delivered_to_fulfillment" {
+  rule           = aws_cloudwatch_event_rule.order_delivered.name
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+  target_id      = "sqs-orderdelivered-fulfillment"
+  arn            = aws_sqs_queue.carrier_orderdelivered_fulfillment.arn
+  input_path     = "$.detail"
+
+  sqs_target {
+    message_group_id = "order-delivered"
+  }
+}
+
+resource "aws_cloudwatch_event_target" "order_delivered_to_order" {
+  rule           = aws_cloudwatch_event_rule.order_delivered.name
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+  target_id      = "sqs-orderdelivered-order"
+  arn            = aws_sqs_queue.carrier_orderdelivered_order.arn
+  input_path     = "$.detail"
+
+  sqs_target {
+    message_group_id = "order-delivered"
   }
 }

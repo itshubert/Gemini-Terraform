@@ -29,5 +29,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-shipping-lambda.zip
+*.zip
 

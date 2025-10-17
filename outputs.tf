@@ -24,7 +24,8 @@ output "sqs_queue_urls" {
     fulfillment_orderinprogress_order      = aws_sqs_queue.fulfillment_orderinprogress_order.url
     fulfillment_ordershipped_order         = aws_sqs_queue.fulfillment_ordershipped_order.url
     fulfillment_orderreadyforshipment_order = aws_sqs_queue.fulfillment_orderreadyforshipment_order.url
-    fulfillment_orderreadyforshipment_carrier = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.url
+    carrier_orderdelivered_fulfillment     = aws_sqs_queue.carrier_orderdelivered_fulfillment.url
+    carrier_orderdelivered_order           = aws_sqs_queue.carrier_orderdelivered_order.url
   }
 }
 
@@ -43,14 +44,21 @@ output "eventbridge_rules" {
     aws_cloudwatch_event_rule.order_shipped.name,
     aws_cloudwatch_event_rule.order_ready_for_shipment.name,
     aws_cloudwatch_event_rule.order_in_progress.name,
+    aws_cloudwatch_event_rule.order_delivered.name,
   ]
 }
 
-output "lambda_function" {
-  description = "Details of the shipping-create Lambda function"
+output "lambda_functions" {
+  description = "Details of the Lambda functions"
   value = var.use_localstack || length(var.lambda_functions) > 0 ? {
-    function_name = aws_lambda_function.shipping_create[0].function_name
-    arn           = aws_lambda_function.shipping_create[0].arn
-    role_arn      = aws_iam_role.lambda_execution_role[0].arn
+    shipping_create = {
+      function_name = aws_lambda_function.shipping_create[0].function_name
+      arn           = aws_lambda_function.shipping_create[0].arn
+    }
+    shipment_ready = {
+      function_name = aws_lambda_function.shipment_ready[0].function_name
+      arn           = aws_lambda_function.shipment_ready[0].arn
+    }
+    shared_role_arn = aws_iam_role.lambda_execution_role[0].arn
   } : null
 }

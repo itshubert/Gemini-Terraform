@@ -97,11 +97,20 @@ resource "aws_sqs_queue" "fulfillment_orderreadyforshipment_order" {
   content_based_deduplication = true
 }
 
-resource "aws_sqs_queue" "fulfillment_orderreadyforshipment_carrier" {
-  name                        = "fulfillment-orderreadyforshipment-carrier.fifo"
+# Order Delivered Queues
+resource "aws_sqs_queue" "carrier_orderdelivered_fulfillment" {
+  name                        = "carrier-orderdelivered-fulfillment.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
 }
+
+resource "aws_sqs_queue" "carrier_orderdelivered_order" {
+  name                        = "carrier-orderdelivered-order.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = true
+}
+
+
 
 # ============================================================================
 # SQS Queue Policies - Allow EventBridge to Send Messages
@@ -331,8 +340,8 @@ resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_order" {
   })
 }
 
-resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_carrier" {
-  queue_url = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.url
+resource "aws_sqs_queue_policy" "carrier_orderdelivered_fulfillment" {
+  queue_url = aws_sqs_queue.carrier_orderdelivered_fulfillment.url
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -342,7 +351,24 @@ resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_carrier" {
         Service = "events.amazonaws.com"
       }
       Action   = "sqs:SendMessage"
-      Resource = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.arn
+      Resource = aws_sqs_queue.carrier_orderdelivered_fulfillment.arn
     }]
   })
 }
+
+resource "aws_sqs_queue_policy" "carrier_orderdelivered_order" {
+  queue_url = aws_sqs_queue.carrier_orderdelivered_order.url
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "events.amazonaws.com"
+      }
+      Action   = "sqs:SendMessage"
+      Resource = aws_sqs_queue.carrier_orderdelivered_order.arn
+    }]
+  })
+}
+

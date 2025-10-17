@@ -150,3 +150,15 @@ resource "aws_cloudwatch_event_rule" "order_in_progress" {
     detail-type = ["OrderInProgress"]
   })
 }
+
+# Order Delivered Rule
+resource "aws_cloudwatch_event_rule" "order_delivered" {
+  name           = "OrderDeliveredRule"
+  description    = "EventBridge rule for OrderDelivered event"
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+
+  event_pattern = jsonencode({
+    source      = ["gemini"]
+    detail-type = ["OrderDelivered"]
+  })
+}
