@@ -63,12 +63,6 @@ resource "aws_sqs_queue" "shipping_labelgenerated_fulfillment" {
 }
 
 # Warehouse Job Completed Queues
-resource "aws_sqs_queue" "job_completed_order" {
-  name                        = "job-completed-order.fifo"
-  fifo_queue                  = true
-  content_based_deduplication = true
-}
-
 resource "aws_sqs_queue" "job_completed_fulfillment" {
   name                        = "job-completed-fulfillment.fifo"
   fifo_queue                  = true
@@ -76,14 +70,15 @@ resource "aws_sqs_queue" "job_completed_fulfillment" {
 }
 
 # Job Pick In Progress Queues
-resource "aws_sqs_queue" "job_pickinprogress_order" {
-  name                        = "job-pickinprogress-order.fifo"
+resource "aws_sqs_queue" "job_pickinprogress_fulfillment" {
+  name                        = "job-pickinprogress-fulfillment.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
 }
 
-resource "aws_sqs_queue" "job_pickinprogress_fulfillment" {
-  name                        = "job-pickinprogress-fulfillment.fifo"
+# Order In Progress Queue
+resource "aws_sqs_queue" "fulfillment_orderinprogress_order" {
+  name                        = "fulfillment-orderinprogress-order.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
 }
@@ -98,6 +93,12 @@ resource "aws_sqs_queue" "fulfillment_ordershipped_order" {
 # Order Ready For Shipment Queue
 resource "aws_sqs_queue" "fulfillment_orderreadyforshipment_order" {
   name                        = "fulfillment-orderreadyforshipment-order.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = true
+}
+
+resource "aws_sqs_queue" "fulfillment_orderreadyforshipment_carrier" {
+  name                        = "fulfillment-orderreadyforshipment-carrier.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
 }
@@ -250,22 +251,6 @@ resource "aws_sqs_queue_policy" "shipping_labelgenerated_fulfillment" {
   })
 }
 
-resource "aws_sqs_queue_policy" "job_completed_order" {
-  queue_url = aws_sqs_queue.job_completed_order.url
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "events.amazonaws.com"
-      }
-      Action   = "sqs:SendMessage"
-      Resource = aws_sqs_queue.job_completed_order.arn
-    }]
-  })
-}
-
 resource "aws_sqs_queue_policy" "job_completed_fulfillment" {
   queue_url = aws_sqs_queue.job_completed_fulfillment.url
 
@@ -282,22 +267,6 @@ resource "aws_sqs_queue_policy" "job_completed_fulfillment" {
   })
 }
 
-resource "aws_sqs_queue_policy" "job_pickinprogress_order" {
-  queue_url = aws_sqs_queue.job_pickinprogress_order.url
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "events.amazonaws.com"
-      }
-      Action   = "sqs:SendMessage"
-      Resource = aws_sqs_queue.job_pickinprogress_order.arn
-    }]
-  })
-}
-
 resource "aws_sqs_queue_policy" "job_pickinprogress_fulfillment" {
   queue_url = aws_sqs_queue.job_pickinprogress_fulfillment.url
 
@@ -310,6 +279,22 @@ resource "aws_sqs_queue_policy" "job_pickinprogress_fulfillment" {
       }
       Action   = "sqs:SendMessage"
       Resource = aws_sqs_queue.job_pickinprogress_fulfillment.arn
+    }]
+  })
+}
+
+resource "aws_sqs_queue_policy" "fulfillment_orderinprogress_order" {
+  queue_url = aws_sqs_queue.fulfillment_orderinprogress_order.url
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "events.amazonaws.com"
+      }
+      Action   = "sqs:SendMessage"
+      Resource = aws_sqs_queue.fulfillment_orderinprogress_order.arn
     }]
   })
 }
@@ -342,6 +327,22 @@ resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_order" {
       }
       Action   = "sqs:SendMessage"
       Resource = aws_sqs_queue.fulfillment_orderreadyforshipment_order.arn
+    }]
+  })
+}
+
+resource "aws_sqs_queue_policy" "fulfillment_orderreadyforshipment_carrier" {
+  queue_url = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.url
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "events.amazonaws.com"
+      }
+      Action   = "sqs:SendMessage"
+      Resource = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.arn
     }]
   })
 }

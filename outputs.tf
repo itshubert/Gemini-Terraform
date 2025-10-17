@@ -11,18 +11,20 @@ output "event_bus_arn" {
 output "sqs_queue_urls" {
   description = "URLs of all SQS queues created"
   value = {
-    order_submitted_inventory          = aws_sqs_queue.order_submitted_inventory.url
-    order_submitted_fulfillment        = aws_sqs_queue.order_submitted_fulfillment.url
-    inventory_level_changed_catalog    = aws_sqs_queue.inventory_level_changed_catalog.url
-    inventory_reserved_order           = aws_sqs_queue.inventory_reserved_order.url
-    inventory_reserved_fulfillment     = aws_sqs_queue.inventory_reserved_fulfillment.url
-    order_stock_failed_order           = aws_sqs_queue.order_stock_failed_order.url
-    fulfillment_task_created_warehouse = aws_sqs_queue.fulfillment_task_created_warehouse.url
-    shipping_labelgenerated_order      = aws_sqs_queue.shipping_labelgenerated_order.url
-    job_completed_order                = aws_sqs_queue.job_completed_order.url
-    job_completed_fulfillment          = aws_sqs_queue.job_completed_fulfillment.url
-    job_pickinprogress_order           = aws_sqs_queue.job_pickinprogress_order.url
-    job_pickinprogress_fulfillment     = aws_sqs_queue.job_pickinprogress_fulfillment.url
+    order_submitted_inventory              = aws_sqs_queue.order_submitted_inventory.url
+    order_submitted_fulfillment            = aws_sqs_queue.order_submitted_fulfillment.url
+    inventory_level_changed_catalog        = aws_sqs_queue.inventory_level_changed_catalog.url
+    inventory_reserved_order               = aws_sqs_queue.inventory_reserved_order.url
+    inventory_reserved_fulfillment         = aws_sqs_queue.inventory_reserved_fulfillment.url
+    order_stock_failed_order               = aws_sqs_queue.order_stock_failed_order.url
+    fulfillment_task_created_warehouse     = aws_sqs_queue.fulfillment_task_created_warehouse.url
+    shipping_labelgenerated_order          = aws_sqs_queue.shipping_labelgenerated_order.url
+    job_completed_fulfillment              = aws_sqs_queue.job_completed_fulfillment.url
+    job_pickinprogress_fulfillment         = aws_sqs_queue.job_pickinprogress_fulfillment.url
+    fulfillment_orderinprogress_order      = aws_sqs_queue.fulfillment_orderinprogress_order.url
+    fulfillment_ordershipped_order         = aws_sqs_queue.fulfillment_ordershipped_order.url
+    fulfillment_orderreadyforshipment_order = aws_sqs_queue.fulfillment_orderreadyforshipment_order.url
+    fulfillment_orderreadyforshipment_carrier = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.url
   }
 }
 
@@ -38,6 +40,9 @@ output "eventbridge_rules" {
     aws_cloudwatch_event_rule.label_generated.name,
     aws_cloudwatch_event_rule.warehouse_job_completed.name,
     aws_cloudwatch_event_rule.job_pick_in_progress.name,
+    aws_cloudwatch_event_rule.order_shipped.name,
+    aws_cloudwatch_event_rule.order_ready_for_shipment.name,
+    aws_cloudwatch_event_rule.order_in_progress.name,
   ]
 }
 

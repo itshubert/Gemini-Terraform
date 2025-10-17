@@ -127,18 +127,6 @@ resource "aws_cloudwatch_event_target" "label_generated_to_fulfillment" {
 }
 
 # Warehouse Job Completed Targets
-resource "aws_cloudwatch_event_target" "warehouse_job_completed_to_order" {
-  rule           = aws_cloudwatch_event_rule.warehouse_job_completed.name
-  event_bus_name = aws_cloudwatch_event_bus.gemini.name
-  target_id      = "sqs-job-completed-order"
-  arn            = aws_sqs_queue.job_completed_order.arn
-  input_path     = "$.detail"
-
-  sqs_target {
-    message_group_id = "job-completed"
-  }
-}
-
 resource "aws_cloudwatch_event_target" "warehouse_job_completed_to_fulfillment" {
   rule           = aws_cloudwatch_event_rule.warehouse_job_completed.name
   event_bus_name = aws_cloudwatch_event_bus.gemini.name
@@ -152,18 +140,6 @@ resource "aws_cloudwatch_event_target" "warehouse_job_completed_to_fulfillment" 
 }
 
 # Job Pick In Progress Targets
-resource "aws_cloudwatch_event_target" "job_pick_in_progress_to_order" {
-  rule           = aws_cloudwatch_event_rule.job_pick_in_progress.name
-  event_bus_name = aws_cloudwatch_event_bus.gemini.name
-  target_id      = "sqs-job-pickinprogress-order"
-  arn            = aws_sqs_queue.job_pickinprogress_order.arn
-  input_path     = "$.detail"
-
-  sqs_target {
-    message_group_id = "job-pickinprogress"
-  }
-}
-
 resource "aws_cloudwatch_event_target" "job_pick_in_progress_to_fulfillment" {
   rule           = aws_cloudwatch_event_rule.job_pick_in_progress.name
   event_bus_name = aws_cloudwatch_event_bus.gemini.name
@@ -199,5 +175,30 @@ resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_order" {
 
   sqs_target {
     message_group_id = "order-ready-for-shipment"
+  }
+}
+
+resource "aws_cloudwatch_event_target" "order_ready_for_shipment_to_carrier" {
+  rule           = aws_cloudwatch_event_rule.order_ready_for_shipment.name
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+  target_id      = "sqs-orderreadyforshipment-carrier"
+  arn            = aws_sqs_queue.fulfillment_orderreadyforshipment_carrier.arn
+  input_path     = "$.detail"
+
+  sqs_target {
+    message_group_id = "order-ready-for-shipment"
+  }
+}
+
+# Order In Progress Target
+resource "aws_cloudwatch_event_target" "order_in_progress_to_order" {
+  rule           = aws_cloudwatch_event_rule.order_in_progress.name
+  event_bus_name = aws_cloudwatch_event_bus.gemini.name
+  target_id      = "sqs-orderinprogress-order"
+  arn            = aws_sqs_queue.fulfillment_orderinprogress_order.arn
+  input_path     = "$.detail"
+
+  sqs_target {
+    message_group_id = "order-in-progress"
   }
 }
